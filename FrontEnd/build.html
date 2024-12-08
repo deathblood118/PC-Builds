@@ -283,11 +283,13 @@
         function enterBudget() {
             budget = document.getElementById('budget').value;
             if (budget) {
+                // Save budget to localStorage
+                localStorage.setItem('userBudget', budget);
                 document.querySelector('.budget-container').style.display = 'none';
                 document.getElementById('cpu-selection').style.display = 'block';
             } else {
                 alert("Please enter a valid budget!");
-            }
+            }   
         }
 
         function selectCpu(cpu) {
@@ -387,88 +389,113 @@
             document.getElementById('components-list').style.display = 'block';
         }
 
-        // Open the modal with the fetched component data
-        function openModal(data) {
-            
-            let modal = document.getElementById('modal');
-            
-            let modalContent = document.getElementById('modal-content');
-            
-            modalContent.innerHTML = ''; // Clear any previous data
-            console.log(data);
-            // Create a table element
-            let table = document.createElement('table');
-            table.style.width = '100%';
-            table.style.borderCollapse = 'collapse';
-            
-            // Create table header
-            let thead = document.createElement('thead');
-            let headerRow = document.createElement('tr');
+    // Open the modal with the fetched component data
+    function openModal(data) {
+    let modal = document.getElementById('modal');
+    let modalContent = document.getElementById('modal-content');
+    modalContent.innerHTML = ''; // Clear any previous data
 
-            let headers = ['CPUId', 'Name', 'Price', 'Discount', 'WebLink'];
-            headers.forEach(headerText => {
-                let th = document.createElement('th');
-                th.textContent = headerText;
-                th.style.border = '1px solid #ddd';
-                th.style.padding = '8px';
-                th.style.textAlign = 'left';
-                th.style.backgroundColor = '#f2f2f2';
-                headerRow.appendChild(th);
-            });
-            
-            thead.appendChild(headerRow);
-            table.appendChild(thead);
+    // Create a table element
+    let table = document.createElement('table');
+    table.style.width = '100%';
+    table.style.borderCollapse = 'collapse';
 
-            // Create table body
-            let tbody = document.createElement('tbody');
+    // Create table header
+    let thead = document.createElement('thead');
+    let headerRow = document.createElement('tr');
+    let headers = ['CPUId', 'Name', 'Price', 'Discount', 'WebLink', 'Action'];
+    headers.forEach(headerText => {
+        let th = document.createElement('th');
+        th.textContent = headerText;
+        th.style.border = '1px solid #ddd';
+        th.style.padding = '8px';
+        th.style.textAlign = 'left';
+        th.style.backgroundColor = '#f2f2f2';
+        headerRow.appendChild(th);
+    });
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
 
-            data.forEach(component => {
-                let row = document.createElement('tr');
+    // Create table body
+    let tbody = document.createElement('tbody');
 
-                // Add each property of the component as a cell
-                ['CPUId', 'Name', 'Price', 'Discount', 'WebLink'].forEach(key => {
-                    let td = document.createElement('td');
-                    td.style.border = '1px solid #ddd';
-                    td.style.padding = '8px';
+    data.forEach(component => {
+        let row = document.createElement('tr');
 
-                    if (key === 'WebLink') {
-                        // Create a clickable link for WebLink
-                        let link = document.createElement('a');
-                        link.href = component[key];
-                        link.textContent = 'View';
-                        link.target = '_blank'; // Open in new tab
-                        td.appendChild(link);
-                    } else {
-                        td.textContent = component[key];
-                    }
+        // Add each property of the component as a cell
+        ['CPUId', 'Name', 'Price', 'Discount', 'WebLink'].forEach(key => {
+            let td = document.createElement('td');
+            td.style.border = '1px solid #ddd';
+            td.style.padding = '8px';
 
-                    row.appendChild(td);
-                });
+            if (key === 'WebLink') {
+                // Create a clickable link for WebLink
+                let link = document.createElement('a');
+                link.href = component[key];
+                link.textContent = 'View';
+                link.target = '_blank'; // Open in new tab
+                td.appendChild(link);
+            } else {
+                td.textContent = component[key];
+            }
 
-                tbody.appendChild(row);
-            });
+            row.appendChild(td);
+        });
 
-            table.appendChild(tbody);
+        // Add "Add to Build" button
+        let actionTd = document.createElement('td');
+        let addButton = document.createElement('button');
+        addButton.textContent = 'Add to Build';
+        addButton.style.padding = '8px 12px';
+        addButton.style.backgroundColor = '#4CAF50';
+        addButton.style.color = 'white';
+        addButton.style.border = 'none';
+        addButton.style.borderRadius = '4px';
+        addButton.style.cursor = 'pointer';
 
-            // Append table to modal content
-            modalContent.appendChild(table);
-            // Ensure the close button is added
+        addButton.onclick = () => {
+            addToBuild(component);
+        };
 
-            let closeButton = document.createElement('button');
-            closeButton.className = 'close-btn';
-            closeButton.textContent = 'Close';
-            closeButton.onclick = closeModal;
-            modalContent.appendChild(closeButton);
-            
-            // Show the modal
-            modal.style.display = 'flex';
-            console.log(document.querySelector('.close-btn'));
-        }
+        actionTd.appendChild(addButton);
+        row.appendChild(actionTd);
+        tbody.appendChild(row);
+    });
 
-        // Close the modal
-        function closeModal() {
-            document.getElementById('modal').style.display = 'none';
-        }
+    table.appendChild(tbody);
+
+    // Append table to modal content
+    modalContent.appendChild(table);
+
+    // Add the close button
+    let closeButton = document.createElement('button');
+    closeButton.className = 'close-btn';
+    closeButton.textContent = 'Close';
+    closeButton.onclick = closeModal;
+    modalContent.appendChild(closeButton);
+
+    // Show the modal
+    modal.style.display = 'flex';
+    }
+
+    function addToBuild(component) {
+    // Retrieve saved components from localStorage or create an empty array if none exist
+    let savedComponents = JSON.parse(localStorage.getItem('savedComponents')) || [];
+
+    // Add the new component to the saved components array
+    savedComponents.push(component);
+
+    // Save the updated components list back to localStorage
+    localStorage.setItem('savedComponents', JSON.stringify(savedComponents));
+
+    // Close the modal after adding the component
+    closeModal();
+    }
+
+    // Close the modal
+    function closeModal() {
+        document.getElementById('modal').style.display = 'none';
+    }
     </script>
 </body>
 </html>
