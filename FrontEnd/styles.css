@@ -95,3 +95,12 @@ header nav a:hover {
 .budget-container button:hover {
     background-color: #005a9e;
 }
+
+header .logo-link {
+    color: #4CAF50; /* Default green color */
+    text-decoration: none; /* Remove underline */
+}
+
+header .logo-link:hover {
+    color: #45a049; /* Slightly darker green when hovered */
+}

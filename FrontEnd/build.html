@@ -209,17 +209,37 @@
             font-size: 18px;
             color: #ccc;
         }
+
+        .budget-display {
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            border-radius: 5px;
+            position: absolute;
+            top: 80px; /* Move it further down */
+            left: 20px; /* Align it to the left */
+            z-index: 10;
+        }
+
+        .budget-display.hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
     <header>
         <div class="logo">
-            <h1>PC Builder</h1>
+            <!-- Make the "PC Builder" text a link to index.html -->
+            <a href="index.html" class="logo-link"><h1>PC Builder</h1></a>
         </div>
         <nav>
             <a href="index.html">Home</a>
             <a href="feedback.html">Feedback</a>
+            <a href="saved-components.html">View Saved Components</a>
         </nav>
+        <div id="budget-display" class="budget-display"></div>
     </header>
 
     <section class="main-section">
@@ -308,13 +328,19 @@
             // Show components based on budget and selected CPU
             let componentsList = document.getElementById('components-list-ul');
             componentsList.innerHTML = '';
+
+            // Update budget display button text
+            let budgetDisplay = document.getElementById('budget-display');
+            budgetDisplay.textContent = `Budget: $${budget}`;
+            budgetDisplay.style.display = 'block'; // Ensure the button is visible
+
             let CPU_Price = (budget * 0.30).toFixed(2);
             let GPU_Price = (budget * 0.35).toFixed(2);
             let Mother_Price = (budget * 0.10).toFixed(2);
             let Ram_Price = (budget * 0.07).toFixed(2);
             let Storage_Price = (budget * 0.07).toFixed(2);
             let Power_Price = (budget * 0.05).toFixed(2);
-            let Case_Price =(budget * 0.06).toFixed(2);
+            let Case_Price = (budget * 0.06).toFixed(2);
 
             let components = [
                 `${selectedCpu}_CPU - Price: $${CPU_Price}`,
@@ -347,36 +373,28 @@
 
                 // Add a click event to each list item (acting as buttons)
                 li.onclick = function() {
-                    // Extract the component type from the component string
-                    let componentType = component.split(' - ')[0];  // E.g., "CPU", "GPU", etc.
-                    
-                    // Get the corresponding price from the 'prices' object
-                    let price = prices[componentType];  // Access the price for the component
-                    // Map component types to their respective endpoints
+                    let componentType = component.split(' - ')[0]; 
+                    let price = prices[componentType]; 
                     let endpointMap = {
-                        AMD_CPU: 'api/cpus_amd',  // Use AMD CPUs as the default
-                        Intel_CPU: 'api/cpus_intel', // Use Intel endpoint for Intel CPUs
-                        AMD_GPU: 'api/gpus_amd', 
-                        Nvidia_GPU: 'api/gpus_nvidia',      // Add other endpoints if available
+                        AMD_CPU: 'api/cpus_amd',
+                        Intel_CPU: 'api/cpus_intel',
+                        AMD_GPU: 'api/gpus_amd',
+                        Nvidia_GPU: 'api/gpus_nvidia',
                         AMD_Motherboard: 'api/motherboards_amd',
-                        intel_Motherboard: 'api/motherboards_intel',
+                        Intel_Motherboard: 'api/motherboards_intel',
                         RAM: 'api/ram',
-                        SDD: 'api/ssd',
+                        SSD: 'api/ssd',
                         HDD: 'api/hdd',
                         Power_Supply: 'api/power',
                         Case: 'api/cases'
                     };
 
+                    let endpoint = endpointMap[componentType] || 'api/cpus_amd';
 
-
-                    // Determine the API endpoint based on the component type
-                    let endpoint = endpointMap[componentType] || 'api/cpus_amd'; // Default to AMD CPUs
-
-                    // Make the fetch request with the price as a query parameter
                     fetch(`http://localhost:3000/${endpoint}?budget=${price}`)
                         .then(response => response.json())
                         .then(data => {
-                            openModal(data); // Open the modal with the fetched data
+                            openModal(data); 
                         })
                         .catch(error => {
                             alert('Failed to fetch components');
